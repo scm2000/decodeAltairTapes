@@ -3,6 +3,8 @@ a little bit of code that decodes an altair tape from a wav file into a .bin
 
 I wrote this code to decode an original Altair 8K BASIC cassette tape to a .bin file
 
+This project does not distribute Microsoft’s Altair BASIC binaries. You must supply your own copy from legally obtained sources (e.g., original cassette, licensed distribution).”
+
 What it does is use "minimodem" to convert a mono .wav file in a file name cassette.wav into
 a basic.dat file of raw demodulated bytes.
 Then it interprets the bytes accoridng to the packet types found on Altair tapes.
