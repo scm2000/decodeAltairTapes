@@ -21,6 +21,9 @@ You will need to install minimodem and have it on your path.
 You will need a version of Python 3 to run this code
 
 ## Running
+NOTE!: The code now takes command line arguments so the following is based on the defaults.  Type
+"python3 altairScanToTape.py -h"  for options.
+
 sample your cassette into a mono .wav file and call it "cassette.wav" in your current directory
 then run: python3 altairScanToTape.py
 
