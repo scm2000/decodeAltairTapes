@@ -1,7 +1,10 @@
 # decodeAltairTapes
 a little bit of code that decodes an altair tape from a wav file into a .bin
 
-I wrote this code to decode an original Altair 8K BASIC cassette tape to a .bin file
+I wrote this code to decode an original Altair 8K BASIC cassette tape I own to a .bin file.
+
+A note about versions of basic..   The 8k v3.2 version of basic tape starts with a leader byte of 0xae..  that also happens to be the length of the second stage bootstrap code found at the beginning of the tape.  so my code skips all the 0xae bytes, plus a count of 0xad bytes which comprise the bootstrap loader.  following that is the packets that make up the actual BASIC load..  If you have a cassette for
+a different version of BASIC you can do some checking on your own.. such as let minimodem decode to basic.dat -- the rest of the program will fail,but take a look at the value of the leader bytes found at the beginning of basic.dat.  Next use the -L option on the command line to rerun with that byte value in decimal.
 
 This project does not distribute Microsoft’s Altair BASIC binaries. You must supply your own copy from legally obtained sources (e.g., original cassette, licensed distribution).”
 
