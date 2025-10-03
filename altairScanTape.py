@@ -1,4 +1,48 @@
 import os
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Decode Altair cassette WAV files."
+    )
+    parser.add_argument(
+        "input_file",
+        nargs="?",
+        default="cassette.wav",
+        help="Input WAV file (default: cassette.wav)"
+    )
+    parser.add_argument(
+        "--outfile", "-o",
+        type=str,
+        default="basicload.bin",
+        help="Output file name (default: basicload.bin)"
+    )
+    parser.add_argument(
+        "--level", "-l",
+        type=str,
+        default="none",
+        help="Basic tape level, eg: 8k_v3.2 (default: none)"
+    )
+    parser.add_argument(
+        "--baud", "-b",
+        type=int,
+        default=300,
+        help="Baud rate (default: 300)"
+    )
+    parser.add_argument(
+        "--mark", "-m",
+        type=int,
+        default=2400,
+        help="Mark frequency in Hz (default: 2400)"
+    )
+    parser.add_argument(
+        "--space", "-s",
+        type=int,
+        default=1850,
+        help="Space frequency in Hz (default: 1850)"
+    )
+    return parser.parse_args()
+
 
 def printKeywords(memory):
     curAddr = 0x88
@@ -20,24 +64,33 @@ def printKeywords(memory):
         print(f'{i}: {hex(baddr)}')
     return
 
-os.system("minimodem --rx -M 2400 -S 1850 -f cassette.wav 300 >basic.dat")
+if __name__ == "__main__":
+    args = parse_args()
+    print("Input file:", args.input_file)
+    print("Output file:", args.outfile)
+    print("Baud:", args.baud)
+    print("Mark:", args.mark)
+    print("Space:", args.space)
+    print("BASIC Level:", args.level)
 
-fp = open('basic.dat', 'rb')
-print('skipping leader')
-a = fp.read(1)[0]
-a = fp.read(1)[0]
-print(hex(a))
-cnt = 1
-while a == 0xae:
-  a = fp.read(1)[0]
-  cnt += 1
-print(f'there were {cnt} leader bytes')
-print('skipping checksum loader')
-cl = fp.read(0xad)
-print(hex(cl[-1]))
+    os.system(f"minimodem --rx -M {args.mark} -S {args.space} -f {args.input_file} {args.baud} >basic.dat")
 
-memory = bytearray(0x8000) #32k (bank switching is a problem)
-hmem = 0
+    fp = open('basic.dat', 'rb')
+    print('skipping leader')
+    a = fp.read(1)[0]
+    a = fp.read(1)[0]
+    print(hex(a))
+    cnt = 1
+    while a == 0xae:
+      a = fp.read(1)[0]
+      cnt += 1
+    print(f'there were {cnt} leader bytes')
+    print('skipping checksum loader')
+    cl = fp.read(0xad)
+    print(hex(cl[-1]))
+
+    memory = bytearray(0x8000) #32k 
+    hmem = 0
 #loop for all packets
 while True :
     #scan for a packet. either 0x3c or 0x78
@@ -75,10 +128,11 @@ while True :
         print(f"read start packet, addr {hex(paddr)}")
         print('dumping memory')
 
-        #before patching, print out keywords
-        printKeywords(memory)
+        #print out keywords
+        if args.level == "8k_v3.2":
+            printKeywords(memory)
 
-        ofp = open('basicLoad.bin', 'wb')
+        ofp = open(f'{args.outfile}', 'wb')
         #this is the runnable basic code
         ofp.write(memory[:hmem+1])
 

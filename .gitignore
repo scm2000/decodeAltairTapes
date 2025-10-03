@@ -208,4 +208,6 @@ __marimo__/
 *.bin
 *.dat
 *.wav
+*.swp
+*.sav
 
