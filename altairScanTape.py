@@ -24,6 +24,12 @@ def parse_args():
         help="Basic tape level, eg: 8k_v3.2 (default: none)"
     )
     parser.add_argument(
+        "--leader_byte", "-L",
+        type=int,
+        default=0xae,
+        help="Leader Byte code (default: 0xae)"
+    )
+    parser.add_argument(
         "--baud", "-b",
         type=int,
         default=300,
@@ -72,8 +78,11 @@ if __name__ == "__main__":
     print("Mark:", args.mark)
     print("Space:", args.space)
     print("BASIC Level:", args.level)
+    print("Leader Byte Code:", args.leader_byte)
 
-    os.system(f"minimodem --rx -M {args.mark} -S {args.space} -f {args.input_file} {args.baud} >basic.dat")
+    cmdline=f'minimodem --rx -M {args.mark} -S {args.space} -f "{args.input_file}" {args.baud} >basic.dat'
+    print(f'Executing: {cmdline}')
+    os.system(cmdline)
 
     fp = open('basic.dat', 'rb')
     print('skipping leader')
@@ -81,12 +90,12 @@ if __name__ == "__main__":
     a = fp.read(1)[0]
     print(hex(a))
     cnt = 1
-    while a == 0xae:
+    while a == args.leader_byte:
       a = fp.read(1)[0]
       cnt += 1
     print(f'there were {cnt} leader bytes')
     print('skipping checksum loader')
-    cl = fp.read(0xad)
+    cl = fp.read(args.leader_byte-1)
     print(hex(cl[-1]))
 
     memory = bytearray(0x8000) #32k 
